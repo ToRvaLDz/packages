@@ -223,6 +223,19 @@ enum class PlatformPlaybackState(val raw: Int) {
   }
 }
 
+/** Kind of a Media3 track group exposed by [Media3TrackFormatMessage]. */
+enum class PlatformMedia3TrackType(val raw: Int) {
+  VIDEO(0),
+  AUDIO(1),
+  TEXT(2);
+
+  companion object {
+    fun ofRaw(raw: Int): PlatformMedia3TrackType? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /**
  * Generated class from Pigeon that represents data sent in messages. This class should not be
  * extended by any user class outside of the generated file.
@@ -1003,6 +1016,298 @@ data class NativeVideoTrackData(
   }
 }
 
+/**
+ * Format metadata of a single Media3 track.
+ *
+ * `Format.NO_VALUE` fields are reported as null.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class Media3TrackFormatMessage(
+    val type: PlatformMedia3TrackType,
+    val groupIndex: Long,
+    val trackIndex: Long,
+    val isSelected: Boolean,
+    val isSupported: Boolean,
+    /** Media3 `C.SelectionFlags` bitmask. */
+    val selectionFlags: Long,
+    /** Media3 `C.RoleFlags` bitmask. */
+    val roleFlags: Long,
+    val id: String? = null,
+    val label: String? = null,
+    val language: String? = null,
+    val sampleMimeType: String? = null,
+    val containerMimeType: String? = null,
+    val codecs: String? = null,
+    val bitrate: Long? = null,
+    val width: Long? = null,
+    val height: Long? = null,
+    val frameRate: Double? = null,
+    val channelCount: Long? = null,
+    val sampleRate: Long? = null,
+    val pcmEncoding: Long? = null,
+    val colorSpace: Long? = null,
+    val colorRange: Long? = null,
+    val colorTransfer: Long? = null,
+    val hasHdrStaticInfo: Boolean? = null
+) {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): Media3TrackFormatMessage {
+      val type = pigeonVar_list[0] as PlatformMedia3TrackType
+      val groupIndex = pigeonVar_list[1] as Long
+      val trackIndex = pigeonVar_list[2] as Long
+      val isSelected = pigeonVar_list[3] as Boolean
+      val isSupported = pigeonVar_list[4] as Boolean
+      val selectionFlags = pigeonVar_list[5] as Long
+      val roleFlags = pigeonVar_list[6] as Long
+      val id = pigeonVar_list[7] as String?
+      val label = pigeonVar_list[8] as String?
+      val language = pigeonVar_list[9] as String?
+      val sampleMimeType = pigeonVar_list[10] as String?
+      val containerMimeType = pigeonVar_list[11] as String?
+      val codecs = pigeonVar_list[12] as String?
+      val bitrate = pigeonVar_list[13] as Long?
+      val width = pigeonVar_list[14] as Long?
+      val height = pigeonVar_list[15] as Long?
+      val frameRate = pigeonVar_list[16] as Double?
+      val channelCount = pigeonVar_list[17] as Long?
+      val sampleRate = pigeonVar_list[18] as Long?
+      val pcmEncoding = pigeonVar_list[19] as Long?
+      val colorSpace = pigeonVar_list[20] as Long?
+      val colorRange = pigeonVar_list[21] as Long?
+      val colorTransfer = pigeonVar_list[22] as Long?
+      val hasHdrStaticInfo = pigeonVar_list[23] as Boolean?
+      return Media3TrackFormatMessage(
+          type,
+          groupIndex,
+          trackIndex,
+          isSelected,
+          isSupported,
+          selectionFlags,
+          roleFlags,
+          id,
+          label,
+          language,
+          sampleMimeType,
+          containerMimeType,
+          codecs,
+          bitrate,
+          width,
+          height,
+          frameRate,
+          channelCount,
+          sampleRate,
+          pcmEncoding,
+          colorSpace,
+          colorRange,
+          colorTransfer,
+          hasHdrStaticInfo)
+    }
+  }
+
+  fun toList(): List<Any?> {
+    return listOf(
+        type,
+        groupIndex,
+        trackIndex,
+        isSelected,
+        isSupported,
+        selectionFlags,
+        roleFlags,
+        id,
+        label,
+        language,
+        sampleMimeType,
+        containerMimeType,
+        codecs,
+        bitrate,
+        width,
+        height,
+        frameRate,
+        channelCount,
+        sampleRate,
+        pcmEncoding,
+        colorSpace,
+        colorRange,
+        colorTransfer,
+        hasHdrStaticInfo,
+    )
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as Media3TrackFormatMessage
+    return MessagesPigeonUtils.deepEquals(this.type, other.type) &&
+        MessagesPigeonUtils.deepEquals(this.groupIndex, other.groupIndex) &&
+        MessagesPigeonUtils.deepEquals(this.trackIndex, other.trackIndex) &&
+        MessagesPigeonUtils.deepEquals(this.isSelected, other.isSelected) &&
+        MessagesPigeonUtils.deepEquals(this.isSupported, other.isSupported) &&
+        MessagesPigeonUtils.deepEquals(this.selectionFlags, other.selectionFlags) &&
+        MessagesPigeonUtils.deepEquals(this.roleFlags, other.roleFlags) &&
+        MessagesPigeonUtils.deepEquals(this.id, other.id) &&
+        MessagesPigeonUtils.deepEquals(this.label, other.label) &&
+        MessagesPigeonUtils.deepEquals(this.language, other.language) &&
+        MessagesPigeonUtils.deepEquals(this.sampleMimeType, other.sampleMimeType) &&
+        MessagesPigeonUtils.deepEquals(this.containerMimeType, other.containerMimeType) &&
+        MessagesPigeonUtils.deepEquals(this.codecs, other.codecs) &&
+        MessagesPigeonUtils.deepEquals(this.bitrate, other.bitrate) &&
+        MessagesPigeonUtils.deepEquals(this.width, other.width) &&
+        MessagesPigeonUtils.deepEquals(this.height, other.height) &&
+        MessagesPigeonUtils.deepEquals(this.frameRate, other.frameRate) &&
+        MessagesPigeonUtils.deepEquals(this.channelCount, other.channelCount) &&
+        MessagesPigeonUtils.deepEquals(this.sampleRate, other.sampleRate) &&
+        MessagesPigeonUtils.deepEquals(this.pcmEncoding, other.pcmEncoding) &&
+        MessagesPigeonUtils.deepEquals(this.colorSpace, other.colorSpace) &&
+        MessagesPigeonUtils.deepEquals(this.colorRange, other.colorRange) &&
+        MessagesPigeonUtils.deepEquals(this.colorTransfer, other.colorTransfer) &&
+        MessagesPigeonUtils.deepEquals(this.hasHdrStaticInfo, other.hasHdrStaticInfo)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.type)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.groupIndex)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.trackIndex)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.isSelected)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.isSupported)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.selectionFlags)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.roleFlags)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.id)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.label)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.language)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sampleMimeType)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.containerMimeType)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.codecs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.bitrate)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.height)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.frameRate)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.channelCount)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sampleRate)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.pcmEncoding)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.colorSpace)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.colorRange)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.colorTransfer)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.hasHdrStaticInfo)
+    return result
+  }
+
+  override fun toString(): String {
+    return "Media3TrackFormatMessage(type=$type, groupIndex=$groupIndex, trackIndex=$trackIndex, isSelected=$isSelected, isSupported=$isSupported, selectionFlags=$selectionFlags, roleFlags=$roleFlags, id=$id, label=$label, language=$language, sampleMimeType=$sampleMimeType, containerMimeType=$containerMimeType, codecs=$codecs, bitrate=$bitrate, width=$width, height=$height, frameRate=$frameRate, channelCount=$channelCount, sampleRate=$sampleRate, pcmEncoding=$pcmEncoding, colorSpace=$colorSpace, colorRange=$colorRange, colorTransfer=$colorTransfer, hasHdrStaticInfo=$hasHdrStaticInfo)"
+  }
+}
+
+/**
+ * Container for the Media3 track metadata.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class NativeMedia3TrackData(
+    val tracks: List<Media3TrackFormatMessage>,
+    /** Whether the text track type is disabled in the track selector. */
+    val textDisabled: Boolean
+) {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NativeMedia3TrackData {
+      val tracks = pigeonVar_list[0] as List<Media3TrackFormatMessage>
+      val textDisabled = pigeonVar_list[1] as Boolean
+      return NativeMedia3TrackData(tracks, textDisabled)
+    }
+  }
+
+  fun toList(): List<Any?> {
+    return listOf(
+        tracks,
+        textDisabled,
+    )
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as NativeMedia3TrackData
+    return MessagesPigeonUtils.deepEquals(this.tracks, other.tracks) &&
+        MessagesPigeonUtils.deepEquals(this.textDisabled, other.textDisabled)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.tracks)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.textDisabled)
+    return result
+  }
+
+  override fun toString(): String {
+    return "NativeMedia3TrackData(tracks=$tracks, textDisabled=$textDisabled)"
+  }
+}
+
+/**
+ * Sent when the text cues to display change.
+ *
+ * Corresponds to ExoPlayer's onCues. An empty [texts] clears the subtitle. Bitmap cues are not
+ * converted: only reported through [hasBitmapCues].
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class CuesEvent(
+    val texts: List<String>,
+    /** The presentation time of the cues, in microseconds. */
+    val presentationTimeUs: Long,
+    val hasBitmapCues: Boolean
+) : PlatformVideoEvent() {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): CuesEvent {
+      val texts = pigeonVar_list[0] as List<String>
+      val presentationTimeUs = pigeonVar_list[1] as Long
+      val hasBitmapCues = pigeonVar_list[2] as Boolean
+      return CuesEvent(texts, presentationTimeUs, hasBitmapCues)
+    }
+  }
+
+  fun toList(): List<Any?> {
+    return listOf(
+        texts,
+        presentationTimeUs,
+        hasBitmapCues,
+    )
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as CuesEvent
+    return MessagesPigeonUtils.deepEquals(this.texts, other.texts) &&
+        MessagesPigeonUtils.deepEquals(this.presentationTimeUs, other.presentationTimeUs) &&
+        MessagesPigeonUtils.deepEquals(this.hasBitmapCues, other.hasBitmapCues)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.texts)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.presentationTimeUs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.hasBitmapCues)
+    return result
+  }
+
+  override fun toString(): String {
+    return "CuesEvent(texts=$texts, presentationTimeUs=$presentationTimeUs, hasBitmapCues=$hasBitmapCues)"
+  }
+}
+
 private open class MessagesPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -1013,48 +1318,60 @@ private open class MessagesPigeonCodec : StandardMessageCodec() {
         return (readValue(buffer) as Long?)?.let { PlatformPlaybackState.ofRaw(it.toInt()) }
       }
       131.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { InitializationEvent.fromList(it) }
+        return (readValue(buffer) as Long?)?.let { PlatformMedia3TrackType.ofRaw(it.toInt()) }
       }
       132.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { PlaybackStateChangeEvent.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { InitializationEvent.fromList(it) }
       }
       133.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { IsPlayingStateEvent.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { PlaybackStateChangeEvent.fromList(it) }
       }
       134.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { AudioTrackChangedEvent.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { IsPlayingStateEvent.fromList(it) }
       }
       135.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let { VideoTrackChangedEvent.fromList(it) }
+        return (readValue(buffer) as? List<Any?>)?.let { AudioTrackChangedEvent.fromList(it) }
       }
       136.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let { VideoTrackChangedEvent.fromList(it) }
+      }
+      137.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PlatformVideoViewCreationParams.fromList(it)
         }
       }
-      137.toByte() -> {
+      138.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { CreationOptions.fromList(it) }
       }
-      138.toByte() -> {
+      139.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { TexturePlayerIds.fromList(it) }
       }
-      139.toByte() -> {
+      140.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { PlaybackState.fromList(it) }
       }
-      140.toByte() -> {
+      141.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { AudioTrackMessage.fromList(it) }
       }
-      141.toByte() -> {
+      142.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { ExoPlayerAudioTrackData.fromList(it) }
       }
-      142.toByte() -> {
+      143.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { NativeAudioTrackData.fromList(it) }
       }
-      143.toByte() -> {
+      144.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { ExoPlayerVideoTrackData.fromList(it) }
       }
-      144.toByte() -> {
+      145.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let { NativeVideoTrackData.fromList(it) }
+      }
+      146.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let { Media3TrackFormatMessage.fromList(it) }
+      }
+      147.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let { NativeMedia3TrackData.fromList(it) }
+      }
+      148.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let { CuesEvent.fromList(it) }
       }
       else -> super.readValueOfType(type, buffer)
     }
@@ -1070,60 +1387,76 @@ private open class MessagesPigeonCodec : StandardMessageCodec() {
         stream.write(130)
         writeValue(stream, value.raw.toLong())
       }
-      is InitializationEvent -> {
+      is PlatformMedia3TrackType -> {
         stream.write(131)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is PlaybackStateChangeEvent -> {
+      is InitializationEvent -> {
         stream.write(132)
         writeValue(stream, value.toList())
       }
-      is IsPlayingStateEvent -> {
+      is PlaybackStateChangeEvent -> {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is AudioTrackChangedEvent -> {
+      is IsPlayingStateEvent -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is VideoTrackChangedEvent -> {
+      is AudioTrackChangedEvent -> {
         stream.write(135)
         writeValue(stream, value.toList())
       }
-      is PlatformVideoViewCreationParams -> {
+      is VideoTrackChangedEvent -> {
         stream.write(136)
         writeValue(stream, value.toList())
       }
-      is CreationOptions -> {
+      is PlatformVideoViewCreationParams -> {
         stream.write(137)
         writeValue(stream, value.toList())
       }
-      is TexturePlayerIds -> {
+      is CreationOptions -> {
         stream.write(138)
         writeValue(stream, value.toList())
       }
-      is PlaybackState -> {
+      is TexturePlayerIds -> {
         stream.write(139)
         writeValue(stream, value.toList())
       }
-      is AudioTrackMessage -> {
+      is PlaybackState -> {
         stream.write(140)
         writeValue(stream, value.toList())
       }
-      is ExoPlayerAudioTrackData -> {
+      is AudioTrackMessage -> {
         stream.write(141)
         writeValue(stream, value.toList())
       }
-      is NativeAudioTrackData -> {
+      is ExoPlayerAudioTrackData -> {
         stream.write(142)
         writeValue(stream, value.toList())
       }
-      is ExoPlayerVideoTrackData -> {
+      is NativeAudioTrackData -> {
         stream.write(143)
         writeValue(stream, value.toList())
       }
-      is NativeVideoTrackData -> {
+      is ExoPlayerVideoTrackData -> {
         stream.write(144)
+        writeValue(stream, value.toList())
+      }
+      is NativeVideoTrackData -> {
+        stream.write(145)
+        writeValue(stream, value.toList())
+      }
+      is Media3TrackFormatMessage -> {
+        stream.write(146)
+        writeValue(stream, value.toList())
+      }
+      is NativeMedia3TrackData -> {
+        stream.write(147)
+        writeValue(stream, value.toList())
+      }
+      is CuesEvent -> {
+        stream.write(148)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -1330,6 +1663,12 @@ interface VideoPlayerInstanceApi {
    * available video tracks based on network conditions.
    */
   fun enableAutoVideoQuality()
+  /** Gets the Media3 format metadata of the video, audio and text tracks. */
+  fun getMedia3Tracks(): NativeMedia3TrackData
+  /** Selects the text track from its [groupIndex] and [trackIndex]. */
+  fun selectTextTrack(groupIndex: Long, trackIndex: Long)
+  /** Disables text track rendering. */
+  fun disableTextTracks()
 
   companion object {
     /** The codec used by VideoPlayerInstanceApi. */
@@ -1619,6 +1958,71 @@ interface VideoPlayerInstanceApi {
             val wrapped: List<Any?> =
                 try {
                   api.enableAutoVideoQuality()
+                  listOf(null)
+                } catch (exception: Throwable) {
+                  MessagesPigeonUtils.wrapError(exception)
+                }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel =
+            BasicMessageChannel<Any?>(
+                binaryMessenger,
+                "dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.getMedia3Tracks$separatedMessageChannelSuffix",
+                codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> =
+                try {
+                  listOf(api.getMedia3Tracks())
+                } catch (exception: Throwable) {
+                  MessagesPigeonUtils.wrapError(exception)
+                }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel =
+            BasicMessageChannel<Any?>(
+                binaryMessenger,
+                "dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.selectTextTrack$separatedMessageChannelSuffix",
+                codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val groupIndexArg = args[0] as Long
+            val trackIndexArg = args[1] as Long
+            val wrapped: List<Any?> =
+                try {
+                  api.selectTextTrack(groupIndexArg, trackIndexArg)
+                  listOf(null)
+                } catch (exception: Throwable) {
+                  MessagesPigeonUtils.wrapError(exception)
+                }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel =
+            BasicMessageChannel<Any?>(
+                binaryMessenger,
+                "dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.disableTextTracks$separatedMessageChannelSuffix",
+                codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> =
+                try {
+                  api.disableTextTracks()
                   listOf(null)
                 } catch (exception: Throwable) {
                   MessagesPigeonUtils.wrapError(exception)

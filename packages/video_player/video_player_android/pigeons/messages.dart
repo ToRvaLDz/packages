@@ -245,9 +245,109 @@ abstract class VideoPlayerInstanceApi {
   /// Enables automatic video quality selection, allowing the player to adaptively
   /// switch between available video tracks based on network conditions.
   void enableAutoVideoQuality();
+
+  // ziptv2: metadati Format Media3 e selezione dei sottotitoli testuali.
+
+  /// Gets the Media3 format metadata of the video, audio and text tracks.
+  NativeMedia3TrackData getMedia3Tracks();
+
+  /// Selects the text track from its [groupIndex] and [trackIndex].
+  void selectTextTrack(int groupIndex, int trackIndex);
+
+  /// Disables text track rendering.
+  void disableTextTracks();
 }
 
 @EventChannelApi()
 abstract class VideoEventChannel {
   PlatformVideoEvent videoEvents();
+}
+
+// ziptv2: tipi del fork per i metadati Media3 e la consegna dei cue.
+
+/// Kind of a Media3 track group exposed by [Media3TrackFormatMessage].
+enum PlatformMedia3TrackType { video, audio, text }
+
+/// Format metadata of a single Media3 track.
+///
+/// `Format.NO_VALUE` fields are reported as null.
+class Media3TrackFormatMessage {
+  Media3TrackFormatMessage({
+    required this.type,
+    required this.groupIndex,
+    required this.trackIndex,
+    required this.isSelected,
+    required this.isSupported,
+    required this.selectionFlags,
+    required this.roleFlags,
+    this.id,
+    this.label,
+    this.language,
+    this.sampleMimeType,
+    this.containerMimeType,
+    this.codecs,
+    this.bitrate,
+    this.width,
+    this.height,
+    this.frameRate,
+    this.channelCount,
+    this.sampleRate,
+    this.pcmEncoding,
+    this.colorSpace,
+    this.colorRange,
+    this.colorTransfer,
+    this.hasHdrStaticInfo,
+  });
+
+  PlatformMedia3TrackType type;
+  int groupIndex;
+  int trackIndex;
+  bool isSelected;
+  bool isSupported;
+
+  /// Media3 `C.SelectionFlags` bitmask.
+  int selectionFlags;
+
+  /// Media3 `C.RoleFlags` bitmask.
+  int roleFlags;
+  String? id;
+  String? label;
+  String? language;
+  String? sampleMimeType;
+  String? containerMimeType;
+  String? codecs;
+  int? bitrate;
+  int? width;
+  int? height;
+  double? frameRate;
+  int? channelCount;
+  int? sampleRate;
+  int? pcmEncoding;
+  int? colorSpace;
+  int? colorRange;
+  int? colorTransfer;
+  bool? hasHdrStaticInfo;
+}
+
+/// Container for the Media3 track metadata.
+class NativeMedia3TrackData {
+  NativeMedia3TrackData({required this.tracks, required this.textDisabled});
+
+  List<Media3TrackFormatMessage> tracks;
+
+  /// Whether the text track type is disabled in the track selector.
+  bool textDisabled;
+}
+
+/// Sent when the text cues to display change.
+///
+/// Corresponds to ExoPlayer's onCues. An empty [texts] clears the subtitle.
+/// Bitmap cues are not converted: only reported through [hasBitmapCues].
+class CuesEvent extends PlatformVideoEvent {
+  late final List<String> texts;
+
+  /// The presentation time of the cues, in microseconds.
+  late final int presentationTimeUs;
+
+  late final bool hasBitmapCues;
 }

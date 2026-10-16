@@ -105,6 +105,9 @@ enum PlatformVideoFormat { dash, hls, ss }
 /// https://developer.android.com/media/media3/exoplayer/listening-to-player-events#playback-state
 enum PlatformPlaybackState { idle, buffering, ready, ended, unknown }
 
+/// Kind of a Media3 track group exposed by [Media3TrackFormatMessage].
+enum PlatformMedia3TrackType { video, audio, text }
+
 sealed class PlatformVideoEvent {}
 
 /// Sent when the video is initialized and ready to play.
@@ -898,6 +901,297 @@ class NativeVideoTrackData {
   }
 }
 
+/// Format metadata of a single Media3 track.
+///
+/// `Format.NO_VALUE` fields are reported as null.
+class Media3TrackFormatMessage {
+  Media3TrackFormatMessage({
+    required this.type,
+    required this.groupIndex,
+    required this.trackIndex,
+    required this.isSelected,
+    required this.isSupported,
+    required this.selectionFlags,
+    required this.roleFlags,
+    this.id,
+    this.label,
+    this.language,
+    this.sampleMimeType,
+    this.containerMimeType,
+    this.codecs,
+    this.bitrate,
+    this.width,
+    this.height,
+    this.frameRate,
+    this.channelCount,
+    this.sampleRate,
+    this.pcmEncoding,
+    this.colorSpace,
+    this.colorRange,
+    this.colorTransfer,
+    this.hasHdrStaticInfo,
+  });
+
+  PlatformMedia3TrackType type;
+
+  int groupIndex;
+
+  int trackIndex;
+
+  bool isSelected;
+
+  bool isSupported;
+
+  /// Media3 `C.SelectionFlags` bitmask.
+  int selectionFlags;
+
+  /// Media3 `C.RoleFlags` bitmask.
+  int roleFlags;
+
+  String? id;
+
+  String? label;
+
+  String? language;
+
+  String? sampleMimeType;
+
+  String? containerMimeType;
+
+  String? codecs;
+
+  int? bitrate;
+
+  int? width;
+
+  int? height;
+
+  double? frameRate;
+
+  int? channelCount;
+
+  int? sampleRate;
+
+  int? pcmEncoding;
+
+  int? colorSpace;
+
+  int? colorRange;
+
+  int? colorTransfer;
+
+  bool? hasHdrStaticInfo;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      type,
+      groupIndex,
+      trackIndex,
+      isSelected,
+      isSupported,
+      selectionFlags,
+      roleFlags,
+      id,
+      label,
+      language,
+      sampleMimeType,
+      containerMimeType,
+      codecs,
+      bitrate,
+      width,
+      height,
+      frameRate,
+      channelCount,
+      sampleRate,
+      pcmEncoding,
+      colorSpace,
+      colorRange,
+      colorTransfer,
+      hasHdrStaticInfo,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static Media3TrackFormatMessage decode(Object result) {
+    result as List<Object?>;
+    return Media3TrackFormatMessage(
+      type: result[0]! as PlatformMedia3TrackType,
+      groupIndex: result[1]! as int,
+      trackIndex: result[2]! as int,
+      isSelected: result[3]! as bool,
+      isSupported: result[4]! as bool,
+      selectionFlags: result[5]! as int,
+      roleFlags: result[6]! as int,
+      id: result[7] as String?,
+      label: result[8] as String?,
+      language: result[9] as String?,
+      sampleMimeType: result[10] as String?,
+      containerMimeType: result[11] as String?,
+      codecs: result[12] as String?,
+      bitrate: result[13] as int?,
+      width: result[14] as int?,
+      height: result[15] as int?,
+      frameRate: result[16] as double?,
+      channelCount: result[17] as int?,
+      sampleRate: result[18] as int?,
+      pcmEncoding: result[19] as int?,
+      colorSpace: result[20] as int?,
+      colorRange: result[21] as int?,
+      colorTransfer: result[22] as int?,
+      hasHdrStaticInfo: result[23] as bool?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! Media3TrackFormatMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(type, other.type) &&
+        _deepEquals(groupIndex, other.groupIndex) &&
+        _deepEquals(trackIndex, other.trackIndex) &&
+        _deepEquals(isSelected, other.isSelected) &&
+        _deepEquals(isSupported, other.isSupported) &&
+        _deepEquals(selectionFlags, other.selectionFlags) &&
+        _deepEquals(roleFlags, other.roleFlags) &&
+        _deepEquals(id, other.id) &&
+        _deepEquals(label, other.label) &&
+        _deepEquals(language, other.language) &&
+        _deepEquals(sampleMimeType, other.sampleMimeType) &&
+        _deepEquals(containerMimeType, other.containerMimeType) &&
+        _deepEquals(codecs, other.codecs) &&
+        _deepEquals(bitrate, other.bitrate) &&
+        _deepEquals(width, other.width) &&
+        _deepEquals(height, other.height) &&
+        _deepEquals(frameRate, other.frameRate) &&
+        _deepEquals(channelCount, other.channelCount) &&
+        _deepEquals(sampleRate, other.sampleRate) &&
+        _deepEquals(pcmEncoding, other.pcmEncoding) &&
+        _deepEquals(colorSpace, other.colorSpace) &&
+        _deepEquals(colorRange, other.colorRange) &&
+        _deepEquals(colorTransfer, other.colorTransfer) &&
+        _deepEquals(hasHdrStaticInfo, other.hasHdrStaticInfo);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'Media3TrackFormatMessage(type: $type, groupIndex: $groupIndex, trackIndex: $trackIndex, isSelected: $isSelected, isSupported: $isSupported, selectionFlags: $selectionFlags, roleFlags: $roleFlags, id: $id, label: $label, language: $language, sampleMimeType: $sampleMimeType, containerMimeType: $containerMimeType, codecs: $codecs, bitrate: $bitrate, width: $width, height: $height, frameRate: $frameRate, channelCount: $channelCount, sampleRate: $sampleRate, pcmEncoding: $pcmEncoding, colorSpace: $colorSpace, colorRange: $colorRange, colorTransfer: $colorTransfer, hasHdrStaticInfo: $hasHdrStaticInfo)';
+  }
+}
+
+/// Container for the Media3 track metadata.
+class NativeMedia3TrackData {
+  NativeMedia3TrackData({required this.tracks, required this.textDisabled});
+
+  List<Media3TrackFormatMessage> tracks;
+
+  /// Whether the text track type is disabled in the track selector.
+  bool textDisabled;
+
+  List<Object?> _toList() {
+    return <Object?>[tracks, textDisabled];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static NativeMedia3TrackData decode(Object result) {
+    result as List<Object?>;
+    return NativeMedia3TrackData(
+      tracks: (result[0]! as List<Object?>).cast<Media3TrackFormatMessage>(),
+      textDisabled: result[1]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! NativeMedia3TrackData || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(tracks, other.tracks) && _deepEquals(textDisabled, other.textDisabled);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'NativeMedia3TrackData(tracks: $tracks, textDisabled: $textDisabled)';
+  }
+}
+
+/// Sent when the text cues to display change.
+///
+/// Corresponds to ExoPlayer's onCues. An empty [texts] clears the subtitle.
+/// Bitmap cues are not converted: only reported through [hasBitmapCues].
+class CuesEvent extends PlatformVideoEvent {
+  CuesEvent({required this.texts, required this.presentationTimeUs, required this.hasBitmapCues});
+
+  List<String> texts;
+
+  /// The presentation time of the cues, in microseconds.
+  int presentationTimeUs;
+
+  bool hasBitmapCues;
+
+  List<Object?> _toList() {
+    return <Object?>[texts, presentationTimeUs, hasBitmapCues];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static CuesEvent decode(Object result) {
+    result as List<Object?>;
+    return CuesEvent(
+      texts: (result[0]! as List<Object?>).cast<String>(),
+      presentationTimeUs: result[1]! as int,
+      hasBitmapCues: result[2]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! CuesEvent || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(texts, other.texts) &&
+        _deepEquals(presentationTimeUs, other.presentationTimeUs) &&
+        _deepEquals(hasBitmapCues, other.hasBitmapCues);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'CuesEvent(texts: $texts, presentationTimeUs: $presentationTimeUs, hasBitmapCues: $hasBitmapCues)';
+  }
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -911,47 +1205,59 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is PlatformPlaybackState) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    } else if (value is InitializationEvent) {
+    } else if (value is PlatformMedia3TrackType) {
       buffer.putUint8(131);
-      writeValue(buffer, value.encode());
-    } else if (value is PlaybackStateChangeEvent) {
+      writeValue(buffer, value.index);
+    } else if (value is InitializationEvent) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is IsPlayingStateEvent) {
+    } else if (value is PlaybackStateChangeEvent) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is AudioTrackChangedEvent) {
+    } else if (value is IsPlayingStateEvent) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is VideoTrackChangedEvent) {
+    } else if (value is AudioTrackChangedEvent) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformVideoViewCreationParams) {
+    } else if (value is VideoTrackChangedEvent) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    } else if (value is CreationOptions) {
+    } else if (value is PlatformVideoViewCreationParams) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    } else if (value is TexturePlayerIds) {
+    } else if (value is CreationOptions) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    } else if (value is PlaybackState) {
+    } else if (value is TexturePlayerIds) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    } else if (value is AudioTrackMessage) {
+    } else if (value is PlaybackState) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    } else if (value is ExoPlayerAudioTrackData) {
+    } else if (value is AudioTrackMessage) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    } else if (value is NativeAudioTrackData) {
+    } else if (value is ExoPlayerAudioTrackData) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    } else if (value is ExoPlayerVideoTrackData) {
+    } else if (value is NativeAudioTrackData) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    } else if (value is NativeVideoTrackData) {
+    } else if (value is ExoPlayerVideoTrackData) {
       buffer.putUint8(144);
+      writeValue(buffer, value.encode());
+    } else if (value is NativeVideoTrackData) {
+      buffer.putUint8(145);
+      writeValue(buffer, value.encode());
+    } else if (value is Media3TrackFormatMessage) {
+      buffer.putUint8(146);
+      writeValue(buffer, value.encode());
+    } else if (value is NativeMedia3TrackData) {
+      buffer.putUint8(147);
+      writeValue(buffer, value.encode());
+    } else if (value is CuesEvent) {
+      buffer.putUint8(148);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -968,33 +1274,42 @@ class _PigeonCodec extends StandardMessageCodec {
         final value = readValue(buffer) as int?;
         return value == null ? null : PlatformPlaybackState.values[value];
       case 131:
-        return InitializationEvent.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : PlatformMedia3TrackType.values[value];
       case 132:
-        return PlaybackStateChangeEvent.decode(readValue(buffer)!);
+        return InitializationEvent.decode(readValue(buffer)!);
       case 133:
-        return IsPlayingStateEvent.decode(readValue(buffer)!);
+        return PlaybackStateChangeEvent.decode(readValue(buffer)!);
       case 134:
-        return AudioTrackChangedEvent.decode(readValue(buffer)!);
+        return IsPlayingStateEvent.decode(readValue(buffer)!);
       case 135:
-        return VideoTrackChangedEvent.decode(readValue(buffer)!);
+        return AudioTrackChangedEvent.decode(readValue(buffer)!);
       case 136:
-        return PlatformVideoViewCreationParams.decode(readValue(buffer)!);
+        return VideoTrackChangedEvent.decode(readValue(buffer)!);
       case 137:
-        return CreationOptions.decode(readValue(buffer)!);
+        return PlatformVideoViewCreationParams.decode(readValue(buffer)!);
       case 138:
-        return TexturePlayerIds.decode(readValue(buffer)!);
+        return CreationOptions.decode(readValue(buffer)!);
       case 139:
-        return PlaybackState.decode(readValue(buffer)!);
+        return TexturePlayerIds.decode(readValue(buffer)!);
       case 140:
-        return AudioTrackMessage.decode(readValue(buffer)!);
+        return PlaybackState.decode(readValue(buffer)!);
       case 141:
-        return ExoPlayerAudioTrackData.decode(readValue(buffer)!);
+        return AudioTrackMessage.decode(readValue(buffer)!);
       case 142:
-        return NativeAudioTrackData.decode(readValue(buffer)!);
+        return ExoPlayerAudioTrackData.decode(readValue(buffer)!);
       case 143:
-        return ExoPlayerVideoTrackData.decode(readValue(buffer)!);
+        return NativeAudioTrackData.decode(readValue(buffer)!);
       case 144:
+        return ExoPlayerVideoTrackData.decode(readValue(buffer)!);
+      case 145:
         return NativeVideoTrackData.decode(readValue(buffer)!);
+      case 146:
+        return Media3TrackFormatMessage.decode(readValue(buffer)!);
+      case 147:
+        return NativeMedia3TrackData.decode(readValue(buffer)!);
+      case 148:
+        return CuesEvent.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -1347,6 +1662,59 @@ class VideoPlayerInstanceApi {
   Future<void> enableAutoVideoQuality() async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.enableAutoVideoQuality$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(pigeonVar_replyList, pigeonVar_channelName, isNullValid: true);
+  }
+
+  /// Gets the Media3 format metadata of the video, audio and text tracks.
+  Future<NativeMedia3TrackData> getMedia3Tracks() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.getMedia3Tracks$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as NativeMedia3TrackData;
+  }
+
+  /// Selects the text track from its [groupIndex] and [trackIndex].
+  Future<void> selectTextTrack(int groupIndex, int trackIndex) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.selectTextTrack$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[
+      groupIndex,
+      trackIndex,
+    ]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(pigeonVar_replyList, pigeonVar_channelName, isNullValid: true);
+  }
+
+  /// Disables text track rendering.
+  Future<void> disableTextTracks() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.disableTextTracks$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
