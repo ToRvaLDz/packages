@@ -449,6 +449,31 @@ public abstract class VideoPlayer implements VideoPlayerInstanceApi {
         trackSelector.buildUponParameters().setOverrideForType(override).build());
   }
 
+  // ziptv2: metadati Media3 e sottotitoli testuali (logica nei helper Media3*).
+  // TODO: Migrate to stable API, see https://github.com/flutter/flutter/issues/147039.
+  @UnstableApi
+  @Override
+  public @NonNull NativeMedia3TrackData getMedia3Tracks() {
+    return new NativeMedia3TrackData(
+        Media3TrackReader.read(exoPlayer.getCurrentTracks()),
+        Media3TextTrackSelection.isDisabled(trackSelector));
+  }
+
+  // TODO: Migrate to stable API, see https://github.com/flutter/flutter/issues/147039.
+  @UnstableApi
+  @Override
+  public void selectTextTrack(long groupIndex, long trackIndex) {
+    Media3TextTrackSelection.select(
+        trackSelector, exoPlayer.getCurrentTracks(), groupIndex, trackIndex);
+  }
+
+  // TODO: Migrate to stable API, see https://github.com/flutter/flutter/issues/147039.
+  @UnstableApi
+  @Override
+  public void disableTextTracks() {
+    Media3TextTrackSelection.disable(trackSelector);
+  }
+
   public void dispose() {
     isDisposed = true;
     mainHandler.removeCallbacksAndMessages(null);
