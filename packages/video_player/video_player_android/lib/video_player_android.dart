@@ -3,3 +3,5 @@
 // found in the LICENSE file.
 
 export 'src/android_video_player.dart';
+export 'src/media3_tracks.dart'
+    show Media3Cues, Media3TrackInfo, Media3TrackInfoSnapshot, Media3TrackType;

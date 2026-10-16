@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 
+import 'media3_tracks.dart';
 import 'messages.g.dart' hide videoEvents;
 import 'messages.g.dart' as pigeon show videoEvents;
 import 'platform_view_player.dart';
@@ -293,6 +294,31 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
     return true;
   }
 
+  // ziptv2: metadati Media3 e sottotitoli testuali.
+
+  /// Returns the Media3 format metadata of the video, audio and text tracks of
+  /// the player, and whether text rendering is disabled.
+  Future<Media3TrackInfoSnapshot> getMedia3Tracks(int playerId) async {
+    return media3SnapshotFromData(await _playerWith(id: playerId).getMedia3Tracks());
+  }
+
+  /// Selects the text track with the given [trackId] (`'<group>_<track>'`, as
+  /// in [Media3TrackInfo.id]), or disables text rendering if it is null.
+  ///
+  /// Throws an [ArgumentError] if [trackId] is malformed.
+  Future<void> selectTextTrack(int playerId, String? trackId) {
+    return _playerWith(id: playerId).selectTextTrack(trackId);
+  }
+
+  /// A broadcast stream of the text cues of the player.
+  ///
+  /// Cues emitted while there is no listener are not buffered. Cue events are
+  /// not delivered by [videoEventsFor]. The stream is closed when the player
+  /// is disposed.
+  Stream<Media3Cues> cuesFor(int playerId) {
+    return _playerWith(id: playerId).cues();
+  }
+
   _PlayerInstance _playerWith({required int id}) {
     final _PlayerInstance? player = _players[id];
     return player ?? (throw StateError('No active player with ID $id.'));
@@ -332,6 +358,8 @@ class _PlayerInstance {
 
   final VideoPlayerInstanceApi _api;
   final StreamController<VideoEvent> _eventStreamController = StreamController<VideoEvent>();
+  final StreamController<Media3Cues> _cuesStreamController =
+      StreamController<Media3Cues>.broadcast();
   late final StreamSubscription<dynamic> _eventSubscription;
   bool _isDisposed = false;
   Timer? _bufferPollingTimer;
@@ -373,6 +401,23 @@ class _PlayerInstance {
 
   Stream<VideoEvent> videoEvents() {
     return _eventStreamController.stream;
+  }
+
+  Stream<Media3Cues> cues() {
+    return _cuesStreamController.stream;
+  }
+
+  Future<NativeMedia3TrackData> getMedia3Tracks() {
+    return _api.getMedia3Tracks();
+  }
+
+  Future<void> selectTextTrack(String? trackId) async {
+    if (trackId == null) {
+      await _api.disableTextTracks();
+      return;
+    }
+    final (int groupIndex, int trackIndex) = parseMedia3TrackId(trackId);
+    await _api.selectTextTrack(groupIndex, trackIndex);
   }
 
   Future<NativeAudioTrackData> getAudioTracks() {
@@ -491,6 +536,7 @@ class _PlayerInstance {
     _isDisposed = true;
     _bufferPollingTimer?.cancel();
     await _eventSubscription.cancel();
+    await _cuesStreamController.close();
   }
 
   void _setBuffering(bool buffering) {
@@ -579,6 +625,10 @@ class _PlayerInstance {
         // This signals that the track selection has completed
         if (_audioTrackSelectionCompleter != null && !_audioTrackSelectionCompleter!.isCompleted) {
           _audioTrackSelectionCompleter!.complete();
+        }
+      case CuesEvent _:
+        if (!_cuesStreamController.isClosed) {
+          _cuesStreamController.add(media3CuesFromEvent(event));
         }
       case VideoTrackChangedEvent _:
         // Complete the video track selection completer only if:

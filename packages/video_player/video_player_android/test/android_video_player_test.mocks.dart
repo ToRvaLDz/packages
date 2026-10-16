@@ -39,6 +39,11 @@ class _FakeNativeVideoTrackData_2 extends _i1.SmartFake implements _i2.NativeVid
     : super(parent, parentInvocation);
 }
 
+class _FakeNativeMedia3TrackData_3 extends _i1.SmartFake implements _i2.NativeMedia3TrackData {
+  _FakeNativeMedia3TrackData_3(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [AndroidVideoPlayerApi].
 ///
 /// See the documentation for Mockito's code generation for more information.
@@ -266,6 +271,37 @@ class MockVideoPlayerInstanceApi extends _i1.Mock implements _i2.VideoPlayerInst
   _i4.Future<void> enableAutoVideoQuality() =>
       (super.noSuchMethod(
             Invocation.method(#enableAutoVideoQuality, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<_i2.NativeMedia3TrackData> getMedia3Tracks() =>
+      (super.noSuchMethod(
+            Invocation.method(#getMedia3Tracks, []),
+            returnValue: _i4.Future<_i2.NativeMedia3TrackData>.value(
+              _FakeNativeMedia3TrackData_3(this, Invocation.method(#getMedia3Tracks, [])),
+            ),
+            returnValueForMissingStub: _i4.Future<_i2.NativeMedia3TrackData>.value(
+              _FakeNativeMedia3TrackData_3(this, Invocation.method(#getMedia3Tracks, [])),
+            ),
+          )
+          as _i4.Future<_i2.NativeMedia3TrackData>);
+
+  @override
+  _i4.Future<void> selectTextTrack(int? groupIndex, int? trackIndex) =>
+      (super.noSuchMethod(
+            Invocation.method(#selectTextTrack, [groupIndex, trackIndex]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> disableTextTracks() =>
+      (super.noSuchMethod(
+            Invocation.method(#disableTextTracks, []),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
