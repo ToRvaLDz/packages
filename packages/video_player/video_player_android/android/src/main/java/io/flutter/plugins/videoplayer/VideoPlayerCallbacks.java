@@ -28,4 +28,7 @@ public interface VideoPlayerCallbacks {
   void onAudioTrackChanged(@Nullable String selectedTrackId);
 
   void onVideoTrackChanged(@Nullable String selectedTrackId);
+
+  // ziptv2: cue dei sottotitoli testuali.
+  void onCues(@NonNull CuesEvent event);
 }

@@ -17,8 +17,13 @@ import androidx.media3.common.C;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.common.Timeline;
+import androidx.media3.common.text.Cue;
+import androidx.media3.common.text.CueGroup;
 import androidx.media3.exoplayer.ExoPlayer;
+import com.google.common.collect.ImmutableList;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,6 +72,24 @@ public final class ExoPlayerEventListenerTest {
   @Before
   public void setUp() {
     eventListener = new TestExoPlayerEventListener(mockExoPlayer, mockCallbacks);
+  }
+
+  @Test
+  public void onCuesForwardsMappedEventToCallbacks() {
+    CueGroup group = new CueGroup(ImmutableList.of(new Cue.Builder().setText("ciao").build()), 42L);
+
+    eventListener.onCues(group);
+
+    verify(mockCallbacks).onCues(new CuesEvent(Arrays.asList("ciao"), 42L, false));
+    verifyNoMoreInteractions(mockCallbacks);
+  }
+
+  @Test
+  public void onCuesWithEmptyGroupSendsEmptyEvent() {
+    eventListener.onCues(CueGroup.EMPTY_TIME_ZERO);
+
+    verify(mockCallbacks).onCues(new CuesEvent(new ArrayList<>(), 0L, false));
+    verifyNoMoreInteractions(mockCallbacks);
   }
 
   @Test

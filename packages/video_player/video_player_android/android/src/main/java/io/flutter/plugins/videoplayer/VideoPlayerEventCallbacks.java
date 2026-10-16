@@ -73,4 +73,9 @@ final class VideoPlayerEventCallbacks implements VideoPlayerCallbacks {
   public void onVideoTrackChanged(@Nullable String selectedTrackId) {
     eventSink.success(new VideoTrackChangedEvent(selectedTrackId));
   }
+
+  @Override
+  public void onCues(@NonNull CuesEvent event) {
+    eventSink.success(event);
+  }
 }

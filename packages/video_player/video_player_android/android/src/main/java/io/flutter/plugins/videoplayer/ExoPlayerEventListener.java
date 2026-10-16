@@ -13,6 +13,7 @@ import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.common.Timeline;
 import androidx.media3.common.Tracks;
+import androidx.media3.common.text.CueGroup;
 import androidx.media3.exoplayer.ExoPlayer;
 
 public abstract class ExoPlayerEventListener implements Player.Listener {
@@ -152,6 +153,12 @@ public abstract class ExoPlayerEventListener implements Player.Listener {
     // Find the currently selected video track and notify
     String selectedVideoTrackId = findSelectedVideoTrackId(tracks);
     events.onVideoTrackChanged(selectedVideoTrackId);
+  }
+
+  // ziptv2: inoltra i cue (un gruppo vuoto cancella il sottotitolo).
+  @Override
+  public void onCues(@NonNull CueGroup cueGroup) {
+    events.onCues(CueMessageMapper.toEvent(cueGroup));
   }
 
   /**

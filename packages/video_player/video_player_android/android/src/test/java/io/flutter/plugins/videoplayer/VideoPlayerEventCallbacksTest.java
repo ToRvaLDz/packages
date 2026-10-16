@@ -112,4 +112,14 @@ public final class VideoPlayerEventCallbacksTest {
     VideoTrackChangedEvent expected = new VideoTrackChangedEvent(trackId);
     assertEquals(expected, actual);
   }
+
+  @Test
+  public void onCuesSendsTheEventAsIs() {
+    CuesEvent event = new CuesEvent(java.util.Arrays.asList("a", "b"), 7L, true);
+
+    eventCallbacks.onCues(event);
+
+    verify(mockEventSink).success(eventCaptor.capture());
+    assertEquals(event, eventCaptor.getValue());
+  }
 }
