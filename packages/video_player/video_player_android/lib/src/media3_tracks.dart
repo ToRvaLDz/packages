@@ -60,6 +60,7 @@ class Media3TrackInfo {
     this.colorRange,
     this.colorTransfer,
     this.hasHdrStaticInfo,
+    this.bitstreamColorTransfer,
   });
 
   /// `C.SELECTION_FLAG_DEFAULT`.
@@ -150,6 +151,15 @@ class Media3TrackInfo {
   /// has no color info.
   final bool? hasHdrStaticInfo;
 
+  /// The `C.ColorTransfer` signaled in the VUI of the HEVC SPS of the
+  /// bitstream; null when the track is not HEVC (or Dolby Vision on HEVC), has
+  /// no SPS or no colour description.
+  ///
+  /// Unlike [colorTransfer], it is available when Media3 leaves the format
+  /// color info null (e.g. Dolby Vision profile 8 in Matroska). It is not used
+  /// by [isHdr].
+  final int? bitstreamColorTransfer;
+
   /// The track id, `'<groupIndex>_<trackIndex>'`, in the same format used by
   /// the audio and video track selection.
   String get id => '${groupIndex}_$trackIndex';
@@ -170,7 +180,8 @@ class Media3TrackInfo {
   String toString() =>
       'Media3TrackInfo($type $id selected=$isSelected supported=$isSupported '
       'mime=$sampleMimeType codecs=$codecs lang=$language label=$label '
-      'flags=$selectionFlags ${width}x$height colorTransfer=$colorTransfer)';
+      'flags=$selectionFlags ${width}x$height colorTransfer=$colorTransfer '
+      'bitstreamColorTransfer=$bitstreamColorTransfer)';
 }
 
 /// The Media3 tracks of a player and the text rendering state.
@@ -244,6 +255,7 @@ Media3TrackInfo media3TrackInfoFromMessage(Media3TrackFormatMessage message) {
     colorRange: message.colorRange,
     colorTransfer: message.colorTransfer,
     hasHdrStaticInfo: message.hasHdrStaticInfo,
+    bitstreamColorTransfer: message.bitstreamColorTransfer,
   );
 }
 
