@@ -38,6 +38,7 @@ void main() {
     int selectionFlags = 0,
     String? sampleMimeType,
     int? colorTransfer,
+    int? bitstreamColorTransfer,
   }) {
     return Media3TrackFormatMessage(
       type: type,
@@ -63,6 +64,7 @@ void main() {
       colorRange: 2,
       colorTransfer: colorTransfer,
       hasHdrStaticInfo: true,
+      bitstreamColorTransfer: bitstreamColorTransfer,
     );
   }
 
@@ -100,6 +102,26 @@ void main() {
       expect(track.channelCount, 6);
       expect(track.pcmEncoding, 2);
       expect(track.hasHdrStaticInfo, isTrue);
+    });
+
+    test('maps bitstreamColorTransfer separately from colorTransfer', () async {
+      final (AndroidVideoPlayer player, MockVideoPlayerInstanceApi api, _) = setUp1();
+      when(api.getMedia3Tracks()).thenAnswer(
+        (_) async => NativeMedia3TrackData(
+          tracks: <Media3TrackFormatMessage>[
+            message(type: PlatformMedia3TrackType.video, bitstreamColorTransfer: 6),
+            message(type: PlatformMedia3TrackType.video, trackIndex: 2),
+          ],
+          textDisabled: false,
+        ),
+      );
+
+      final Media3TrackInfoSnapshot snapshot = await player.getMedia3Tracks(playerId);
+
+      expect(snapshot.tracks[0].bitstreamColorTransfer, 6);
+      expect(snapshot.tracks[0].colorTransfer, isNull);
+      expect(snapshot.tracks[0].isHdr, isFalse);
+      expect(snapshot.tracks[1].bitstreamColorTransfer, isNull);
     });
 
     test('maps every track type', () async {
