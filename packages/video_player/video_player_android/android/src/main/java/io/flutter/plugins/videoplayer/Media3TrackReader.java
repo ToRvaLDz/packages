@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.media3.common.C;
 import androidx.media3.common.ColorInfo;
 import androidx.media3.common.Format;
+import androidx.media3.common.MimeTypes;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.util.UnstableApi;
 import java.util.ArrayList;
@@ -19,6 +20,11 @@ import java.util.List;
  *
  * <p>All the methods are pure functions of a {@link Tracks} instance. {@link Format#NO_VALUE}
  * fields are reported as null.
+ *
+ * <p>{@code colorTransfer} is the one of {@link Format#colorInfo}; {@code bitstreamColorTransfer} is
+ * the one signaled in the HEVC SPS VUI, read from {@code initializationData} (see {@link
+ * HevcSpsColorTransfer}). The two are kept separate: Media3 leaves {@code colorInfo} null e.g. for
+ * Dolby Vision profile 8 in Matroska.
  *
  * <p>Notes on Media3 behavior:
  *
@@ -113,8 +119,28 @@ final class Media3TrackReader {
         colorInfo != null ? intOrNull(colorInfo.colorRange) : null,
         colorInfo != null ? intOrNull(colorInfo.colorTransfer) : null,
         colorInfo != null ? colorInfo.hdrStaticInfo != null : null,
-        // Filled from the HEVC SPS VUI in a later commit.
-        null);
+        bitstreamColorTransfer(format));
+  }
+
+  /**
+   * Color transfer from the HEVC SPS VUI, for HEVC and Dolby Vision profile 5/8/10 (dvhe/dvh1,
+   * HEVC-based) tracks that carry the parameter sets in {@code initializationData}.
+   */
+  // TODO: Migrate to stable API, see https://github.com/flutter/flutter/issues/147039.
+  @UnstableApi
+  @Nullable
+  private static Long bitstreamColorTransfer(@NonNull Format format) {
+    if (format.initializationData.isEmpty()) {
+      return null;
+    }
+    boolean hevc = MimeTypes.VIDEO_H265.equals(format.sampleMimeType);
+    boolean hevcBasedDolbyVision =
+        MimeTypes.VIDEO_DOLBY_VISION.equals(format.sampleMimeType)
+            && format.codecs != null
+            && (format.codecs.startsWith("dvhe") || format.codecs.startsWith("dvh1"));
+    return hevc || hevcBasedDolbyVision
+        ? HevcSpsColorTransfer.read(format.initializationData)
+        : null;
   }
 
   @Nullable
