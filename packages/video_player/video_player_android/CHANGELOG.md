@@ -1,3 +1,7 @@
+## 2.12.2+ziptv2.2
+
+* Fork ziptv2: aggiunge `Media3TrackInfo.bitstreamColorTransfer`, il transfer colore letto dalla VUI dell'SPS HEVC (anche per Dolby Vision HEVC), disponibile quando `Format.colorInfo` di Media3 è null (es. Dolby Vision profilo 8 in MKV).
+
 ## 2.12.2+ziptv2.1
 
 * Fork ziptv2: aggiunge `getMedia3Tracks()`, `selectTextTrack()`, `cuesFor()` su `AndroidVideoPlayer` (metadati `Format` Media3 e sottotitoli testuali embedded).
