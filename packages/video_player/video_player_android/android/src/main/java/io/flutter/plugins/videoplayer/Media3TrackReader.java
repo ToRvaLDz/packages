@@ -112,7 +112,9 @@ final class Media3TrackReader {
         colorInfo != null ? intOrNull(colorInfo.colorSpace) : null,
         colorInfo != null ? intOrNull(colorInfo.colorRange) : null,
         colorInfo != null ? intOrNull(colorInfo.colorTransfer) : null,
-        colorInfo != null ? colorInfo.hdrStaticInfo != null : null);
+        colorInfo != null ? colorInfo.hdrStaticInfo != null : null,
+        // Filled from the HEVC SPS VUI in a later commit.
+        null);
   }
 
   @Nullable

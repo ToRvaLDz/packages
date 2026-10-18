@@ -930,6 +930,7 @@ class Media3TrackFormatMessage {
     this.colorRange,
     this.colorTransfer,
     this.hasHdrStaticInfo,
+    this.bitstreamColorTransfer,
   });
 
   PlatformMedia3TrackType type;
@@ -982,6 +983,10 @@ class Media3TrackFormatMessage {
 
   bool? hasHdrStaticInfo;
 
+  /// Color transfer read from the HEVC SPS VUI of the bitstream (`C.COLOR_TRANSFER_*`),
+  /// null when absent or not HEVC.
+  int? bitstreamColorTransfer;
+
   List<Object?> _toList() {
     return <Object?>[
       type,
@@ -1008,6 +1013,7 @@ class Media3TrackFormatMessage {
       colorRange,
       colorTransfer,
       hasHdrStaticInfo,
+      bitstreamColorTransfer,
     ];
   }
 
@@ -1042,6 +1048,7 @@ class Media3TrackFormatMessage {
       colorRange: result[21] as int?,
       colorTransfer: result[22] as int?,
       hasHdrStaticInfo: result[23] as bool?,
+      bitstreamColorTransfer: result[24] as int?,
     );
   }
 
@@ -1077,7 +1084,8 @@ class Media3TrackFormatMessage {
         _deepEquals(colorSpace, other.colorSpace) &&
         _deepEquals(colorRange, other.colorRange) &&
         _deepEquals(colorTransfer, other.colorTransfer) &&
-        _deepEquals(hasHdrStaticInfo, other.hasHdrStaticInfo);
+        _deepEquals(hasHdrStaticInfo, other.hasHdrStaticInfo) &&
+        _deepEquals(bitstreamColorTransfer, other.bitstreamColorTransfer);
   }
 
   @override
@@ -1086,7 +1094,7 @@ class Media3TrackFormatMessage {
 
   @override
   String toString() {
-    return 'Media3TrackFormatMessage(type: $type, groupIndex: $groupIndex, trackIndex: $trackIndex, isSelected: $isSelected, isSupported: $isSupported, selectionFlags: $selectionFlags, roleFlags: $roleFlags, id: $id, label: $label, language: $language, sampleMimeType: $sampleMimeType, containerMimeType: $containerMimeType, codecs: $codecs, bitrate: $bitrate, width: $width, height: $height, frameRate: $frameRate, channelCount: $channelCount, sampleRate: $sampleRate, pcmEncoding: $pcmEncoding, colorSpace: $colorSpace, colorRange: $colorRange, colorTransfer: $colorTransfer, hasHdrStaticInfo: $hasHdrStaticInfo)';
+    return 'Media3TrackFormatMessage(type: $type, groupIndex: $groupIndex, trackIndex: $trackIndex, isSelected: $isSelected, isSupported: $isSupported, selectionFlags: $selectionFlags, roleFlags: $roleFlags, id: $id, label: $label, language: $language, sampleMimeType: $sampleMimeType, containerMimeType: $containerMimeType, codecs: $codecs, bitrate: $bitrate, width: $width, height: $height, frameRate: $frameRate, channelCount: $channelCount, sampleRate: $sampleRate, pcmEncoding: $pcmEncoding, colorSpace: $colorSpace, colorRange: $colorRange, colorTransfer: $colorTransfer, hasHdrStaticInfo: $hasHdrStaticInfo, bitstreamColorTransfer: $bitstreamColorTransfer)';
   }
 }
 

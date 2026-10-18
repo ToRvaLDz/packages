@@ -1049,7 +1049,12 @@ data class Media3TrackFormatMessage(
     val colorSpace: Long? = null,
     val colorRange: Long? = null,
     val colorTransfer: Long? = null,
-    val hasHdrStaticInfo: Boolean? = null
+    val hasHdrStaticInfo: Boolean? = null,
+    /**
+     * Color transfer read from the HEVC SPS VUI of the bitstream (`C.COLOR_TRANSFER_*`), null when
+     * absent or not HEVC.
+     */
+    val bitstreamColorTransfer: Long? = null
 ) {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): Media3TrackFormatMessage {
@@ -1077,6 +1082,7 @@ data class Media3TrackFormatMessage(
       val colorRange = pigeonVar_list[21] as Long?
       val colorTransfer = pigeonVar_list[22] as Long?
       val hasHdrStaticInfo = pigeonVar_list[23] as Boolean?
+      val bitstreamColorTransfer = pigeonVar_list[24] as Long?
       return Media3TrackFormatMessage(
           type,
           groupIndex,
@@ -1101,7 +1107,8 @@ data class Media3TrackFormatMessage(
           colorSpace,
           colorRange,
           colorTransfer,
-          hasHdrStaticInfo)
+          hasHdrStaticInfo,
+          bitstreamColorTransfer)
     }
   }
 
@@ -1131,6 +1138,7 @@ data class Media3TrackFormatMessage(
         colorRange,
         colorTransfer,
         hasHdrStaticInfo,
+        bitstreamColorTransfer,
     )
   }
 
@@ -1165,7 +1173,8 @@ data class Media3TrackFormatMessage(
         MessagesPigeonUtils.deepEquals(this.colorSpace, other.colorSpace) &&
         MessagesPigeonUtils.deepEquals(this.colorRange, other.colorRange) &&
         MessagesPigeonUtils.deepEquals(this.colorTransfer, other.colorTransfer) &&
-        MessagesPigeonUtils.deepEquals(this.hasHdrStaticInfo, other.hasHdrStaticInfo)
+        MessagesPigeonUtils.deepEquals(this.hasHdrStaticInfo, other.hasHdrStaticInfo) &&
+        MessagesPigeonUtils.deepEquals(this.bitstreamColorTransfer, other.bitstreamColorTransfer)
   }
 
   override fun hashCode(): Int {
@@ -1194,11 +1203,12 @@ data class Media3TrackFormatMessage(
     result = 31 * result + MessagesPigeonUtils.deepHash(this.colorRange)
     result = 31 * result + MessagesPigeonUtils.deepHash(this.colorTransfer)
     result = 31 * result + MessagesPigeonUtils.deepHash(this.hasHdrStaticInfo)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.bitstreamColorTransfer)
     return result
   }
 
   override fun toString(): String {
-    return "Media3TrackFormatMessage(type=$type, groupIndex=$groupIndex, trackIndex=$trackIndex, isSelected=$isSelected, isSupported=$isSupported, selectionFlags=$selectionFlags, roleFlags=$roleFlags, id=$id, label=$label, language=$language, sampleMimeType=$sampleMimeType, containerMimeType=$containerMimeType, codecs=$codecs, bitrate=$bitrate, width=$width, height=$height, frameRate=$frameRate, channelCount=$channelCount, sampleRate=$sampleRate, pcmEncoding=$pcmEncoding, colorSpace=$colorSpace, colorRange=$colorRange, colorTransfer=$colorTransfer, hasHdrStaticInfo=$hasHdrStaticInfo)"
+    return "Media3TrackFormatMessage(type=$type, groupIndex=$groupIndex, trackIndex=$trackIndex, isSelected=$isSelected, isSupported=$isSupported, selectionFlags=$selectionFlags, roleFlags=$roleFlags, id=$id, label=$label, language=$language, sampleMimeType=$sampleMimeType, containerMimeType=$containerMimeType, codecs=$codecs, bitrate=$bitrate, width=$width, height=$height, frameRate=$frameRate, channelCount=$channelCount, sampleRate=$sampleRate, pcmEncoding=$pcmEncoding, colorSpace=$colorSpace, colorRange=$colorRange, colorTransfer=$colorTransfer, hasHdrStaticInfo=$hasHdrStaticInfo, bitstreamColorTransfer=$bitstreamColorTransfer)"
   }
 }
 

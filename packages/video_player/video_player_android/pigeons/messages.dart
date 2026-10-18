@@ -297,6 +297,7 @@ class Media3TrackFormatMessage {
     this.colorRange,
     this.colorTransfer,
     this.hasHdrStaticInfo,
+    this.bitstreamColorTransfer,
   });
 
   PlatformMedia3TrackType type;
@@ -327,6 +328,10 @@ class Media3TrackFormatMessage {
   int? colorRange;
   int? colorTransfer;
   bool? hasHdrStaticInfo;
+
+  /// Color transfer read from the HEVC SPS VUI of the bitstream (`C.COLOR_TRANSFER_*`),
+  /// null when absent or not HEVC.
+  int? bitstreamColorTransfer;
 }
 
 /// Container for the Media3 track metadata.
