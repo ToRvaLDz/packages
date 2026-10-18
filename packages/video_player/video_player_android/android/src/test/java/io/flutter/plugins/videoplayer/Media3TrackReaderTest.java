@@ -227,4 +227,66 @@ public class Media3TrackReaderTest {
   public void emptyTracksYieldEmptyList() {
     assertTrue(Media3TrackReader.read(Tracks.EMPTY).isEmpty());
   }
+
+  private static List<byte[]> initData(String hex) {
+    return HevcSpsColorTransferTest.initData(hex);
+  }
+
+  @Test
+  public void dolbyVisionWithoutColorInfoExposesBitstreamTransfer() {
+    Format format =
+        new Format.Builder()
+            .setSampleMimeType(MimeTypes.VIDEO_DOLBY_VISION)
+            .setCodecs("dvhe.08.06")
+            .setInitializationData(initData(HevcSpsColorTransferTest.PQ_HEX))
+            .build();
+
+    Media3TrackFormatMessage m = only(tracksOf(group(true, true, format)));
+
+    assertNull(m.getColorTransfer());
+    assertEquals(Long.valueOf(C.COLOR_TRANSFER_ST2084), m.getBitstreamColorTransfer());
+  }
+
+  @Test
+  public void hevcKeepsContainerAndBitstreamTransferSeparate() {
+    ColorInfo colorInfo =
+        new ColorInfo.Builder()
+            .setColorSpace(C.COLOR_SPACE_BT2020)
+            .setColorRange(C.COLOR_RANGE_LIMITED)
+            .setColorTransfer(C.COLOR_TRANSFER_HLG)
+            .build();
+    Format format =
+        new Format.Builder()
+            .setSampleMimeType(MimeTypes.VIDEO_H265)
+            .setColorInfo(colorInfo)
+            .setInitializationData(initData(HevcSpsColorTransferTest.PQ_HEX))
+            .build();
+
+    Media3TrackFormatMessage m = only(tracksOf(group(true, true, format)));
+
+    assertEquals(Long.valueOf(C.COLOR_TRANSFER_HLG), m.getColorTransfer());
+    assertEquals(Long.valueOf(C.COLOR_TRANSFER_ST2084), m.getBitstreamColorTransfer());
+  }
+
+  @Test
+  public void nonHevcVideoHasNullBitstreamTransfer() {
+    Format format =
+        new Format.Builder()
+            .setSampleMimeType(MimeTypes.VIDEO_H264)
+            .setInitializationData(initData(HevcSpsColorTransferTest.PQ_HEX))
+            .build();
+
+    Media3TrackFormatMessage m = only(tracksOf(group(true, true, format)));
+
+    assertNull(m.getBitstreamColorTransfer());
+  }
+
+  @Test
+  public void hevcWithoutInitializationDataHasNullBitstreamTransfer() {
+    Format format = new Format.Builder().setSampleMimeType(MimeTypes.VIDEO_H265).build();
+
+    Media3TrackFormatMessage m = only(tracksOf(group(true, true, format)));
+
+    assertNull(m.getBitstreamColorTransfer());
+  }
 }
