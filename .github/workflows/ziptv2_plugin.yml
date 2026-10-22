@@ -1,0 +1,329 @@
+# video_player_android di ziptv2: candidato testato + promozione manuale (ziptv2#554).
+#
+# Ogni lunedì (e a mano). Un pre-check senza clone (ls-remote dei tag + versione
+# del pubspec del fork) ferma il run in pochi secondi se non c'è un tag nuovo:
+# il clone del monorepo e i test partono solo ~1 volta al mese.
+#   1. promozione: se ziptv2 ha messo in `ref:` (merge della PR) il candidato
+#      costruito dal `ziptv2` attuale, `ziptv2` avanza a quel candidato;
+#   2. riferimento upstream: l'ultimo tag `video_player_android-v*` di
+#      flutter/packages; se è la base di `ziptv2` non c'è niente da fare;
+#   3. rebase di `ziptv2` su quel tag -> branch `ziptv2-next` (le righe di versione
+#      le risolve .ziptv2/version_merge.py; altri conflitti = issue nel fork);
+#   4. test del solo plugin: `flutter test` (Dart) e `testDebugUnitTest` (Java);
+#   5. push di `ziptv2-next` e del tag `ziptv2/<versione>-<nostro>` sul candidato,
+#      PR in ToRvaLDz/ziptv2 che aggiorna `ref:` in app/pubspec.yaml e il lockfile.
+# analyze e test dell'app li fa la CI di ziptv2 sulla PR; prima del merge, UAT su
+# Fire Stick e Fold. Una PR chiusa senza merge non viene riaperta per la stessa
+# coppia tag/nostro branch: la prossima arriva con il tag upstream successivo.
+name: ziptv2 plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Riproponi il candidato anche se la sua PR è già stata chiusa
+        type: boolean
+        default: false
+  schedule:
+    - cron: '0 2 * * 1'
+
+concurrency:
+  group: ziptv2-plugin
+  cancel-in-progress: false
+
+permissions:
+  contents: write # push di ziptv2-next, del tag del candidato e avanzamento di ziptv2
+  issues: write # issue sul conflitto di rebase
+
+env:
+  APP_REPO: ToRvaLDz/ziptv2
+  APP_PUBSPEC: app/pubspec.yaml
+  PLUGIN: packages/video_player/video_player_android
+  TAG_PREFIX: video_player_android-v
+  CANDIDATE_TAG_PREFIX: ziptv2/
+  PR_BRANCH_PREFIX: video-player-candidate/
+
+jobs:
+  # Nessun checkout: confronta l'ultimo tag upstream con la base di `ziptv2`
+  # (la versione del pubspec del plugin, `X.Y.Z+ziptv2.N`).
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.tags.outputs.run }}
+    steps:
+      - name: Tag upstream nuovo?
+        id: tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          latest=$(git ls-remote --tags --refs https://github.com/flutter/packages.git "refs/tags/$TAG_PREFIX*" |
+            sed -n "s|.*refs/tags/$TAG_PREFIX||p" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          version=$(gh api -H 'Accept: application/vnd.github.raw' "repos/$GITHUB_REPOSITORY/contents/$PLUGIN/pubspec.yaml?ref=ziptv2" |
+            sed -n 's/^version:[[:space:]]*//p')
+          base=${version%%+*}
+          [ -n "$latest" ] && [ -n "$base" ] || { echo "::error::pre-check fallito (latest='$latest', versione='$version')"; exit 1; }
+          if [ "$latest" != "$base" ] || [ "$FORCE" = "true" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::ziptv2 su $base, ultimo tag upstream $latest: si prepara il candidato"
+          else
+            echo "::notice::ziptv2 già su $latest, niente da fare"
+          fi
+
+  candidate:
+    needs: check
+    if: needs.check.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Token per ziptv2
+        env:
+          ZIPTV2_TOKEN: ${{ secrets.ZIPTV2_TOKEN }}
+        run: |
+          [ -n "$ZIPTV2_TOKEN" ] || { echo "::error::manca il secret ZIPTV2_TOKEN (PAT con Contents e Pull requests in scrittura su $APP_REPO)"; exit 1; }
+
+      # Monorepo grande: clone parziale, i blob arrivano solo quando servono.
+      - uses: actions/checkout@v7
+        with:
+          ref: ziptv2
+          fetch-depth: 0
+          filter: blob:none
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ secrets.ZIPTV2_TOKEN }}
+          path: .app
+
+      - name: Preparazione git
+        run: |
+          git config user.name "ziptv2-bot"
+          git config user.email "ziptv2-bot@users.noreply.github.com"
+          git remote add upstream https://github.com/flutter/packages.git
+          git fetch -q --no-tags --filter=blob:none upstream "refs/tags/$TAG_PREFIX*:refs/tags/$TAG_PREFIX*"
+          # Il driver deve restare raggiungibile durante il rebase (l'albero cambia).
+          cp .ziptv2/version_merge.py "$RUNNER_TEMP/version_merge.py"
+          git config merge.ziptv2-version.name "versioni del fork ziptv2"
+          git config merge.ziptv2-version.driver "python3 $RUNNER_TEMP/version_merge.py %O %A %B %P"
+          printf '%s merge=ziptv2-version\n' "$PLUGIN/pubspec.yaml" "$PLUGIN/CHANGELOG.md" >> "$(git rev-parse --git-path info/attributes)"
+
+      - name: Test del merge driver
+        run: python3 .ziptv2/test_version_merge.py
+
+      - name: Versione in produzione
+        id: prod
+        run: |
+          ref=$(awk '/url: https:\/\/github.com\/ToRvaLDz\/packages/ {f=1} f && /ref:/ {print $2; exit}' ".app/$APP_PUBSPEC")
+          [[ "$ref" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::ref del fork non trovato in $APP_PUBSPEC"; exit 1; }
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+      # La PR di un candidato è stata accettata (ref: = quel candidato): `ziptv2`
+      # diventa il candidato, così i prossimi rebase partono dalla versione approvata.
+      # Solo se il candidato è stato costruito dal `ziptv2` attuale: commit arrivati
+      # dopo non si perdono, entreranno nel prossimo candidato.
+      - name: Promozione
+        env:
+          PROD: ${{ steps.prod.outputs.ref }}
+        run: |
+          head=$(git rev-parse HEAD)
+          [ "$PROD" = "$head" ] && exit 0
+          tag=$(git tag --points-at "$PROD" -l "$CANDIDATE_TAG_PREFIX*" | head -1)
+          if [ -z "$tag" ]; then
+            echo "::notice::in produzione c'è ${PROD:0:8}, non è un candidato di questo workflow: ziptv2 resta dov'è"
+            exit 0
+          fi
+          base=$(git tag -l --format='%(contents)' "$tag" | sed -n 's/^base=//p')
+          if [ "$base" = "$head" ]; then
+            git push --force-with-lease="ziptv2:$head" origin "$PROD:refs/heads/ziptv2"
+            git reset -q --hard "$PROD"
+            echo "::notice::ziptv2 avanzato al candidato promosso $tag (${PROD:0:8})"
+          else
+            echo "::notice::in produzione c'è $tag, costruito da ${base:0:8}: ziptv2 ($head) ha commit nuovi, resta dov'è"
+          fi
+
+      - name: Tag upstream
+        id: upstream
+        run: |
+          latest=$(git tag -l "$TAG_PREFIX*" --sort=-v:refname | grep -E "^$TAG_PREFIX[0-9]+\.[0-9]+\.[0-9]+$" | head -1)
+          base=$(git describe --tags --abbrev=0 --match "$TAG_PREFIX*" HEAD)
+          [ -n "$latest" ] && [ -n "$base" ] || { echo "::error::tag upstream non trovati (latest='$latest', base='$base')"; exit 1; }
+          ours=$(git rev-parse HEAD)
+          id="${latest#"$TAG_PREFIX"}-${ours:0:8}"
+          {
+            echo "latest=$latest"
+            echo "base=$base"
+            echo "ours=$ours"
+            echo "id=$id"
+          } >> "$GITHUB_OUTPUT"
+          echo "::notice::ziptv2 su $base, ultimo tag upstream $latest"
+
+      - name: Candidato da proporre?
+        id: seen
+        env:
+          GH_TOKEN: ${{ secrets.ZIPTV2_TOKEN }}
+          LATEST: ${{ steps.upstream.outputs.latest }}
+          BASE: ${{ steps.upstream.outputs.base }}
+          ID: ${{ steps.upstream.outputs.id }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          if [ "$LATEST" = "$BASE" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::nessun tag upstream nuovo, niente da proporre"
+            exit 0
+          fi
+          pr=$(gh pr list -R "$APP_REPO" --head "$PR_BRANCH_PREFIX$ID" --state all --json number,state --jq '.[0] | select(.) | "\(.number) \(.state)"')
+          if [ -n "$pr" ] && { [ "$FORCE" != "true" ] || [ "${pr#* }" = "OPEN" ]; }; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$ID ha già la PR $APP_REPO#${pr% *} (${pr#* })"
+          fi
+
+      - name: Rebase sul tag upstream
+        id: rebase
+        if: steps.seen.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LATEST: ${{ steps.upstream.outputs.latest }}
+          BASE: ${{ steps.upstream.outputs.base }}
+          OURS: ${{ steps.upstream.outputs.ours }}
+        run: |
+          if ! git rebase --onto "$LATEST" "$BASE"; then
+            files=$(git diff --name-only --diff-filter=U | sed 's/^/- `/; s/$/`/')
+            git rebase --abort
+            title="Rebase di ziptv2 su $TAG_PREFIX* in conflitto"
+            body=$(printf 'Il rebase di `ziptv2` (%s, base `%s`) su `%s` va in conflitto.\n\nFile in conflitto:\n%s\n\nRun: %s\n\nRisolvi a mano col merge driver configurato (vedi `.ziptv2/README.md`): `git rebase --onto %s %s` sul branch `ziptv2` e `git push --force-with-lease`.' \
+              "${OURS:0:8}" "$BASE" "$LATEST" "$files" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" "$LATEST" "$BASE")
+            issue=$(gh issue list --state open --search "in:title \"Rebase di ziptv2\"" --json number --jq '.[0].number // empty')
+            if [ -n "$issue" ]; then gh issue comment "$issue" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+            echo "::error::rebase su $LATEST in conflitto"
+            exit 1
+          fi
+          version=$(sed -n 's/^version:[[:space:]]*//p' "$PLUGIN/pubspec.yaml")
+          case "$version" in
+            "${LATEST#"$TAG_PREFIX"}+ziptv2."*) ;;
+            *) echo "::error::versione del candidato inattesa: $version"; exit 1 ;;
+          esac
+          {
+            echo "candidate=$(git rev-parse HEAD)"
+            echo "version=$version"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Versione di Flutter di ziptv2
+        id: flutter
+        if: steps.seen.outputs.skip != 'true'
+        run: |
+          v=$(sed -n 's/^[[:space:]]*flutter-version:[[:space:]]*"\{0,1\}\([0-9.]*\)"\{0,1\}.*/\1/p' .app/.github/workflows/ci.yml | head -1)
+          [ -n "$v" ] || { echo "::error::flutter-version non trovata nella CI di ziptv2"; exit 1; }
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        if: steps.seen.outputs.skip != 'true'
+        with:
+          flutter-version: ${{ steps.flutter.outputs.version }}
+          channel: stable
+          cache: true
+
+      - uses: actions/setup-java@v6
+        if: steps.seen.outputs.skip != 'true'
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Test Dart del plugin
+        if: steps.seen.outputs.skip != 'true'
+        working-directory: ${{ env.PLUGIN }}
+        run: |
+          flutter pub get
+          flutter test
+
+      - name: Test Java del plugin
+        if: steps.seen.outputs.skip != 'true'
+        working-directory: ${{ env.PLUGIN }}/example
+        run: |
+          flutter pub get
+          flutter build apk --config-only
+          ./android/gradlew -p android :video_player_android:testDebugUnitTest --console=plain
+
+      - uses: actions/upload-artifact@v7
+        if: failure() && steps.seen.outputs.skip != 'true'
+        with:
+          name: test-java
+          path: ${{ env.PLUGIN }}/example/build/video_player_android/reports/tests/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # Il tag tiene raggiungibile il candidato anche dopo i prossimi push forzati di
+      # ziptv2-next, e porta la base da cui è stato costruito (serve alla promozione).
+      - name: Push del candidato
+        if: steps.seen.outputs.skip != 'true'
+        env:
+          ID: ${{ steps.upstream.outputs.id }}
+          OURS: ${{ steps.upstream.outputs.ours }}
+          LATEST: ${{ steps.upstream.outputs.latest }}
+        run: |
+          git tag -f -a "$CANDIDATE_TAG_PREFIX$ID" -m "base=$OURS" -m "upstream=$LATEST"
+          git push --force origin HEAD:refs/heads/ziptv2-next
+          git push --force origin "refs/tags/$CANDIDATE_TAG_PREFIX$ID"
+
+      - name: Aggiorna ref e lockfile in ziptv2
+        if: steps.seen.outputs.skip != 'true'
+        env:
+          PROD: ${{ steps.prod.outputs.ref }}
+          CANDIDATE: ${{ steps.rebase.outputs.candidate }}
+          VERSION: ${{ steps.rebase.outputs.version }}
+          ID: ${{ steps.upstream.outputs.id }}
+          LATEST: ${{ steps.upstream.outputs.latest }}
+          BASE: ${{ steps.upstream.outputs.base }}
+          OURS: ${{ steps.upstream.outputs.ours }}
+        run: |
+          sed -i "s/ref: $PROD/ref: $CANDIDATE/" ".app/$APP_PUBSPEC"
+          grep -q "ref: $CANDIDATE" ".app/$APP_PUBSPEC"
+          (cd .app && flutter pub get)
+          grep -q "$CANDIDATE" .app/pubspec.lock
+          # Novità upstream tra la base attuale e il nuovo tag (righe aggiunte al CHANGELOG)
+          news=$(git diff "$BASE" "$LATEST" -- "$PLUGIN/CHANGELOG.md" | sed -n 's/^+\([^+]\)/\1/p; s/^+$//p')
+          {
+            echo "Candidato del fork \`ToRvaLDz/packages\`: \`$LATEST\` + i nostri commit di \`ziptv2\` (\`${OURS:0:8}\`), branch \`ziptv2-next\` = \`${CANDIDATE:0:8}\` (tag \`$CANDIDATE_TAG_PREFIX$ID\`, versione \`$VERSION\`)."
+            echo
+            echo "- Oggi in produzione: \`${PROD:0:8}\` (base \`$BASE\`)"
+            echo "- Test del plugin passati: \`flutter test\` (Dart) e \`testDebugUnitTest\` (Java)"
+            echo "- analyze e test dell'app: la CI di questa PR"
+            echo "- Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo
+            echo "### Novità upstream"
+            echo
+            echo "$news"
+            echo
+            echo "Prima del merge: UAT del player su Fire Stick e Fold. Al run successivo al merge (lunedì, o a mano) \`ziptv2\` del fork avanza a questo candidato."
+            echo "Per rifiutarlo: chiudi la PR, non verrà riproposta per questa coppia tag/branch."
+          } > "$RUNNER_TEMP/pr-body.md"
+
+      - name: PR in ziptv2
+        id: pr
+        if: steps.seen.outputs.skip != 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.ZIPTV2_TOKEN }}
+          path: .app
+          add-paths: |
+            app/pubspec.yaml
+            pubspec.lock
+          branch: ${{ env.PR_BRANCH_PREFIX }}${{ steps.upstream.outputs.id }}
+          commit-message: 'chore: video_player_android del fork su ${{ steps.rebase.outputs.version }}'
+          title: 'chore: video_player_android del fork su ${{ steps.rebase.outputs.version }}'
+          body-path: ${{ runner.temp }}/pr-body.md
+          committer: ziptv2-bot <ziptv2-bot@users.noreply.github.com>
+          author: ziptv2-bot <ziptv2-bot@users.noreply.github.com>
+          delete-branch: true
+
+      # Una sola proposta aperta alla volta: le PR dei candidati precedenti si chiudono.
+      - name: Chiudi le PR superate
+        if: steps.pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.ZIPTV2_TOKEN }}
+          NEW: ${{ steps.pr.outputs.pull-request-number }}
+        run: |
+          gh pr list -R "$APP_REPO" --state open --json number,headRefName \
+            --jq ".[] | select(.headRefName | startswith(\"$PR_BRANCH_PREFIX\")) | select(.number != $NEW) | .number" |
+          while read -r n; do
+            gh pr close -R "$APP_REPO" "$n" --delete-branch --comment "Superata da #$NEW."
+          done
