@@ -1,3 +1,7 @@
+## 2.12.2+ziptv2.3
+
+* Fork ziptv2: Media3 1.12.0-alpha01 (corregge il seek che, dopo un `open()` fallito, riprendeva l'estrattore da una posizione obsoleta e andava in `ArrayIndexOutOfBoundsException`); `compileSdk` 37 e Robolectric 4.17.
+
 ## 2.12.2+ziptv2.2
 
 * Fork ziptv2: aggiunge `Media3TrackInfo.bitstreamColorTransfer`, il transfer colore letto dalla VUI dell'SPS HEVC (anche per Dolby Vision HEVC), disponibile quando `Format.colorInfo` di Media3 è null (es. Dolby Vision profilo 8 in MKV).
